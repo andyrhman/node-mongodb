@@ -1,33 +1,41 @@
-import { myDataSource } from "../config/db.config";
 import { Request, Response } from "express"
-import { Order } from '../entity/order.entity';
+import { Order } from "../models/order";
 
 export const Orders = async (req: Request, res: Response) => {
-    const repository = myDataSource.getMongoRepository(Order);
-
-    const orders = await repository.aggregate([
-        {
-            $lookup: {
-                from: "order_items", // Ensure this is the correct collection name
-                localField: "_id",   // This is the field from the orders collection
-                foreignField: "order_items", // This is the field from the order_items collection
-                as: "order_items" // The field where the data will be populated
-            }
-        }
-    ]).toArray();
+    const orders = await Order.find().populate('order_items');
 
     res.send(orders);
 };
 
 export const CreateOrder = async (req: Request, res: Response) => {
-    const body = req.body;
+    try {
+        const body = req.body;
 
-    const repository = myDataSource.getMongoRepository(Order);
+        const order = await Order.create({
+            name: body.name,
+            email: body.email
+        });
 
-    const order = await repository.save({
-        name: body.name,
-        email: body.email
-    });
-
-    res.status(201).send(order)
+        res.status(201).send(order)
+    } catch (error) {
+        return res.status(400).send({ messsage: "Error trying to save the data" })
+    }
 }
+
+// ? Alternative
+/* ? https://www.phind.com/search?cache=adk89zkq2ifb4tjbv3ma76x8
+*    export const CreateOrder = async (req: Request, res: Response) => {
+*        try {
+*            const body = req.body;
+*            const order = new Order({
+*                name: body.name,
+*                email: body.email
+*            });
+*            await order.save();
+*        
+*            res.status(201).send(order);
+*        } catch (error) {
+*            return res.status(400).send({messsage: "Error trying to save the data"})
+*        }
+*    }
+*/
