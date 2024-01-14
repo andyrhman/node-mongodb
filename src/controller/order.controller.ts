@@ -1,11 +1,16 @@
-import { Request, Response } from "express"
-import { Order } from "../models/order";
+import { Request, Response } from "express";
+import { Order } from "../models/order"; // Import the model
 
 export const Orders = async (req: Request, res: Response) => {
-    const orders = await Order.find().populate('order_items');
+    try {
+        const orders = Order.find({});
 
-    res.send(orders);
+        res.send(orders)
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
+
 
 export const CreateOrder = async (req: Request, res: Response) => {
     try {
