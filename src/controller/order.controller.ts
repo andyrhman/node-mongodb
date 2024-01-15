@@ -1,13 +1,41 @@
 import { Request, Response } from "express";
 import { Order } from "../models/order"; // Import the model
 import { paginate } from "../utility/pagination.utility";
+import sanitizeHtml from "sanitize-html";
 
 export const Orders = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    let search = req.query.search;
 
     try {
         const result = await paginate(Order, page, limit);
+
+        if (typeof search === 'string') {
+            search = sanitizeHtml(search);
+            if (search) {
+                const searchOrder = search.toString().toLowerCase();
+
+                result.data = result.data.filter((order: { order_items: any[]; name: string; email: string; }) => {
+                    const orderMatches = order.order_items.some((orderItem: { product_title: string; }) => {
+                        return orderItem.product_title.toLowerCase().includes(searchOrder);
+                    });
+                    return (
+                        order.name.toLowerCase().includes(searchOrder) ||
+                        order.email.toLowerCase().includes(searchOrder) ||
+                        orderMatches
+                    );
+                });
+
+                // Check if the resulting filtered data array is empty
+                if (result.data.length === 0) {
+                    // Respond with a 404 status code and a message
+                    return res.status(404).json({ message: `No ${search} matching your search criteria.` });
+                }
+            }
+        }
+
+
         res.send(result);
     } catch (error) {
         res.status(500).send(error.message);
