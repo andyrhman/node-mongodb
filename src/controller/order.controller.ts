@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import { Order } from "../models/order"; // Import the model
-import { paginate } from "../utility/pagination.utility";
+import { Order } from "../models/order";
+import paginateOrders from "../utility/order-pagination.utility";
 import sanitizeHtml from "sanitize-html";
+import { Parser } from "@json2csv/plainjs";
 
 export const Orders = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -9,7 +10,7 @@ export const Orders = async (req: Request, res: Response) => {
     let search = req.query.search;
 
     try {
-        const result = await paginate(Order, page, limit);
+        const result = await paginateOrders(page, limit);
 
         if (typeof search === 'string') {
             search = sanitizeHtml(search);
@@ -42,6 +43,36 @@ export const Orders = async (req: Request, res: Response) => {
     }
 };
 
+export const Export = async (req: Request, res: Response) => {
+    const parser = new Parser({
+        fields: ['ID', 'Name', 'Email', 'Product Title', 'Price', 'Quantity']
+    });
+
+    const orders = await Order.find({});
+
+    const json: any[] = []; // Consider defining a more specific type for your JSON objects
+
+    // Use the IOrder and IOrderItem interfaces for type annotations
+    orders.forEach((o) => {
+        o.order_items.forEach((i) => { // Note the change from order_item to order_items
+            json.push({
+                ID: o.id,
+                Name: o.name,
+                Email: o.email,
+                'Product Title': i.product_title,
+                Price: i.price,
+                Quantity: i.quantity
+            });
+        });
+    });
+
+    const csv = parser.parse(json);
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment('orders.csv');
+    res.send(csv);
+};
+/*
 export const CreateOrder = async (req: Request, res: Response) => {
     try {
         const body = req.body;
@@ -56,6 +87,7 @@ export const CreateOrder = async (req: Request, res: Response) => {
         return res.status(400).send({ messsage: "Error trying to save the data" })
     }
 }
+*/
 
 // ? Alternative
 /* ? https://www.phind.com/search?cache=adk89zkq2ifb4tjbv3ma76x8
