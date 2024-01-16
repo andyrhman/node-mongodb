@@ -1,5 +1,13 @@
 import mongoose from "mongoose";
 
+export interface IOrderItem extends Document {
+    _id: string;
+    product_title: string
+    price: number;
+    quantity: number;
+    order: string
+}
+
 export const OrderItemSchema = new mongoose.Schema({
     product_title: { type: String, required: true },
     price: { type: Number, required: true },
@@ -8,4 +16,4 @@ export const OrderItemSchema = new mongoose.Schema({
     order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' }
 });
 
-export const OrderItem = mongoose.model('OrderItem', OrderItemSchema);
+export const OrderItem = mongoose.model<IOrderItem>('OrderItem', OrderItemSchema);

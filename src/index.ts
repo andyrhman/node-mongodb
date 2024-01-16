@@ -12,6 +12,6 @@ mongoose.connect('mongodb://localhost/node_admin')
     .then(() => console.log('Database has been initialized!'))
     .catch((err) => console.error(err));
 
-app.listen(8000, () => {
+app.listen(3000, () => {
     console.log('Server listening on port 8000');
 });

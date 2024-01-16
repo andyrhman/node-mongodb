@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Order } from "../models/order";
 import paginateOrders from "../utility/order-pagination.utility";
+import { paginate } from "../utility/pagination.utility";
 import sanitizeHtml from "sanitize-html";
 import { Parser } from "@json2csv/plainjs";
 
@@ -10,7 +11,7 @@ export const Orders = async (req: Request, res: Response) => {
     let search = req.query.search;
 
     try {
-        const result = await paginateOrders(page, limit);
+        const result = await paginate(Order, page, limit);
 
         if (typeof search === 'string') {
             search = sanitizeHtml(search);

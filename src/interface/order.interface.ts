@@ -1,10 +1,12 @@
 import { Document } from 'mongoose';
 
 export interface IOrder extends Document {
+    _id: string;
     name: string;
     email: string;
     created_at: Date;
     order_items: {
+        _id: string;
         product_title: string;
         price: number;
         quantity: number;

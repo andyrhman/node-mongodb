@@ -14,7 +14,7 @@ mongoose.connect('mongodb://localhost/node_admin').then(async () => {
         for (let j = 0; j < randomInt(1, 5); j++) {
             const orderItem = await OrderItem.create({
                 product_title: faker.commerce.productName(),
-                price: parseInt(faker.commerce.price({ min: 100, max: 1000, dec: 0 }), 10),
+                price: faker.commerce.price({ min: 100, max: 1000, dec: 0 }),
                 quantity: randomInt(1, 5),
             });
             order.order_items.push(orderItem); // Push the new order item to the order's items

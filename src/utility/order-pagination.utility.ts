@@ -1,5 +1,5 @@
 // order-pagination.js
-import { IOrder } from "../interface/order.interface";
+import { IOrder } from '../models/order'
 import { Order } from "../models/order";
 
 const paginateOrders = async (page = 1, limit = 10) => {
